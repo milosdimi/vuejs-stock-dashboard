@@ -15,12 +15,12 @@ export default {
   },
   data() {
     return {
-      data: null,
+      apple: null,
     };
   },
   async created() {
-    this.data = await stockService.fetchData("$AAPL");
-    console.log(this.data);
+    this.apple = await stockService.getCompanyHistory("AAPL");
+    console.log(this.apple);
   },
 };
 </script>
