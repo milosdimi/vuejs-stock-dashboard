@@ -1,43 +1,59 @@
 <template>
-  <BaseCard title="Revenue last 3 years">
-    <p style="color: #fff">Hier kommt spaeter der Chart rein</p>
-  </BaseCard>
+  <div class="dashboard">
+    <header class="dashboard__header">
+      <span class="dashboard__pill"></span>
+      <h1 class="dashboard__title">The Magnificent Seven Companies</h1>
+    </header>
+
+    <CompanyOverview v-if="companies.length" :companies="companies" />
+    <p v-else class="dashboard__loading">Lade Daten &hellip;</p>
+  </div>
 </template>
 
 <script>
-import BaseCard from "./components/BaseCard.vue";
+import CompanyOverview from "./components/CompanyOverview.vue";
 import stockService from "./services/StockService";
 
 export default {
   name: "App",
   components: {
-    BaseCard,
+    CompanyOverview,
   },
   data() {
     return {
-      apple: null,
+      companies: [],
     };
   },
   async created() {
-    this.apple = await stockService.getCompanyHistory("AAPL");
-    console.log(this.apple);
+    this.companies = await stockService.getAllCompanyHistories();
   },
 };
 </script>
 
-<style>
-body {
-  margin: 0;
+<style scoped>
+.dashboard {
+  max-width: var(--dashboard-max-width);
+  margin: 0 auto;
 }
-#app {
-  width: 100vw;
-  min-height: 100vh;
-  padding: 100px;
-  box-sizing: border-box;
-  background: radial-gradient(
-    71.11% 100% at 50% 0%,
-    #020204 14.6%,
-    #011f35 100%
-  );
+
+.dashboard__header {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+  margin-bottom: 40px;
+}
+
+.dashboard__pill {
+  width: 72px;
+  height: 32px;
+  border-radius: 999px;
+  background: var(--color-accent);
+}
+
+.dashboard__title {
+  margin: 0;
+  font-weight: 700;
+  font-size: 40px;
+  line-height: 1.2;
 }
 </style>

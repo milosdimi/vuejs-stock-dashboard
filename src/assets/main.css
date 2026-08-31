@@ -1,0 +1,54 @@
+/* ---- Design-Tokens: einmal definiert, ueberall via var(--...) genutzt ---- */
+:root {
+  --color-text: #ffffff;
+  --color-card: #011f35;
+  --color-panel: rgba(2, 58, 98, 0.2);
+  --color-accent: #39daff;
+  --color-positive: #3ba752;
+  --color-negative: #c41c1c;
+  --color-scrollbar: #0d3f66;
+
+  --radius-card: 16px;
+  --radius-panel: 20px;
+
+  --font-base: "Rubik", sans-serif;
+
+  --dashboard-max-width: 1240px;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  font-family: var(--font-base);
+  color: var(--color-text);
+}
+
+#app {
+  min-height: 100vh;
+  padding: 40px 24px;
+  background: radial-gradient(
+    71.11% 100% at 50% 0%,
+    #020204 14.6%,
+    #011f35 100%
+  );
+}
+
+/* Material Symbols: Icon-Name als Text -> Icon */
+.material-symbols-rounded {
+  font-family: "Material Symbols Rounded";
+  font-weight: normal;
+  font-style: normal;
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+  white-space: nowrap;
+  word-wrap: normal;
+  direction: ltr;
+  -webkit-font-smoothing: antialiased;
+}

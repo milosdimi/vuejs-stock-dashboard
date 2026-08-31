@@ -26,18 +26,15 @@ export default {
   flex-direction: column;
   gap: 20px;
   padding: 20px 32px;
-  background: #011f35;
-  border-radius: 16px;
-  box-sizing: border-box;
+  background: var(--color-card);
+  border-radius: var(--radius-card);
 }
 
 .card__title {
   margin: 0;
-  font-family: 'Rubik', sans-serif;
   font-weight: 600;
   font-size: 20px;
   line-height: 20px;
-  color: #ffffff;
 }
 
 .card__body {
