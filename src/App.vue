@@ -6,11 +6,21 @@
 
 <script>
 import BaseCard from "./components/BaseCard.vue";
+import stockService from "./services/StockService";
 
 export default {
   name: "App",
   components: {
     BaseCard,
+  },
+  data() {
+    return {
+      data: null,
+    };
+  },
+  async created() {
+    this.data = await stockService.fetchData("$AAPL");
+    console.log(this.data);
   },
 };
 </script>
