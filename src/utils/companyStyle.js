@@ -14,6 +14,17 @@ export const COMPANY_COLORS = {
 // Reihenfolge in Charts und Legenden
 export const COMPANY_ORDER = ['META', 'TSLA', 'NVDA', 'MSFT', 'AAPL', 'GOOG', 'AMZN']
 
+// Blau-Verlauf hell -> dunkel, als geordnete Palette (z.B. fuer sortierte Balken)
+export const BLUE_SCALE = [
+  '#39daff',
+  '#31bfe2',
+  '#29a5c5',
+  '#218aa8',
+  '#196f8c',
+  '#11546f',
+  '#093a52',
+]
+
 // Bringt die geladenen Firmen in die Figma-Reihenfolge
 export function orderCompanies(companies) {
   return COMPANY_ORDER.map((symbol) =>

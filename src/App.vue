@@ -20,6 +20,20 @@
           <RevenueBreakdownChart :companies="companies" />
         </BaseCard>
       </section>
+
+      <section class="dashboard__row">
+        <BaseCard title="Net Income TTM" class="dashboard__card--w4">
+          <NetIncomeChart :companies="companies" />
+        </BaseCard>
+
+        <BaseCard title="Gross Margin in % LQ" class="dashboard__card--w5">
+          <GrossMarginChart :companies="companies" />
+        </BaseCard>
+
+        <BaseCard title="Revenue Growth in % YoY" class="dashboard__card--w6">
+          <RevenueGrowthChart :companies="companies" />
+        </BaseCard>
+      </section>
     </template>
 
     <p v-else class="dashboard__loading">Lade Daten &hellip;</p>
@@ -31,6 +45,9 @@ import CompanyOverview from "./components/CompanyOverview.vue";
 import BaseCard from "./components/BaseCard.vue";
 import RevenueTrendChart from "./components/RevenueTrendChart.vue";
 import RevenueBreakdownChart from "./components/RevenueBreakdownChart.vue";
+import NetIncomeChart from "./components/NetIncomeChart.vue";
+import GrossMarginChart from "./components/GrossMarginChart.vue";
+import RevenueGrowthChart from "./components/RevenueGrowthChart.vue";
 import stockService from "./services/StockService";
 
 export default {
@@ -40,6 +57,9 @@ export default {
     BaseCard,
     RevenueTrendChart,
     RevenueBreakdownChart,
+    NetIncomeChart,
+    GrossMarginChart,
+    RevenueGrowthChart,
   },
   data() {
     return {
@@ -66,17 +86,23 @@ export default {
 }
 
 .dashboard__pill {
-  width: 72px;
+  flex: none;
+  box-sizing: content-box;
+  width: 96px;
   height: 32px;
-  border-radius: 999px;
+  border-radius: 0 100px 100px 0;
   background: var(--color-accent);
+  /* linke Kante bis zum Viewport-Rand ziehen; die Breite im Flex-Flow bleibt 96px */
+  margin-left: calc(50% - 50vw);
+  padding-left: calc(50vw - 50%);
 }
 
 .dashboard__title {
   margin: 0;
-  font-weight: 700;
-  font-size: 40px;
-  line-height: 1.2;
+  font-weight: 500;
+  font-size: 36px;
+  line-height: 43px;
+  color: #f9f9f9;
 }
 
 .dashboard__row {
@@ -93,8 +119,15 @@ export default {
   width: 494px;
 }
 
-.dashboard__todo {
-  margin: 0;
-  opacity: 0.5;
+.dashboard__card--w4 {
+  width: 392px;
+}
+
+.dashboard__card--w5 {
+  width: 293px;
+}
+
+.dashboard__card--w6 {
+  width: 491px;
 }
 </style>

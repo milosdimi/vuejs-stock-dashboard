@@ -55,6 +55,22 @@ export function ttm(quarters, key = 'revenue') {
   return quarters.slice(-4).reduce((sum, point) => sum + (point[key] || 0), 0)
 }
 
+// YoY-Wachstum: die letzten `count` Quartale, jedes vs. dem gleichen Quartal ein Jahr davor (4 Positionen zurueck).
+// Ergebnis: [{ quarter: '26Q1', growth: 15.7 }, ...] aeltestes zuerst.
+export function yoyGrowth(quarters, count = 4) {
+  const result = []
+  for (let i = quarters.length - count; i < quarters.length; i++) {
+    const now = quarters[i]
+    const yearAgo = quarters[i - 4]
+    if (!now || !yearAgo || !yearAgo.revenue) continue
+    result.push({
+      quarter: now.quarter,
+      growth: ((now.revenue - yearAgo.revenue) / yearAgo.revenue) * 100,
+    })
+  }
+  return result
+}
+
 // "26Q2" -> "Q2 2026"   |   "Q1 2024" bleibt   |   "Q4-26" -> "Q4 2026"
 export function formatQuarter(label) {
   if (!label) return ''

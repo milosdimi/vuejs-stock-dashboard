@@ -22,6 +22,11 @@
   box-sizing: border-box;
 }
 
+/* Scrollbar-Platz immer reservieren -> 100vw == Inhaltsbreite, kein Wackeln */
+html {
+  scrollbar-gutter: stable;
+}
+
 body {
   margin: 0;
   font-family: var(--font-base);
