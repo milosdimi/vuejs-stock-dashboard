@@ -1,7 +1,13 @@
 <template>
   <div class="trend">
     <div class="trend__chart">
-      <canvas ref="canvas"></canvas>
+      <BaseChart
+        type="line"
+        :chart-data="chartData"
+        :chart-options="chartOptions"
+        :height="270"
+        aria-label="Umsatzentwicklung der Magnificent Seven ueber die letzten 3 Jahre"
+      />
     </div>
 
     <ul class="trend__legend">
@@ -14,7 +20,7 @@
 </template>
 
 <script>
-import Chart from 'chart.js/auto'
+import BaseChart from './BaseChart.vue'
 import { COMPANY_COLORS, orderCompanies } from '../utils/companyStyle'
 import { toBillions, lastCalendarQuarters } from '../utils/metrics'
 
@@ -22,16 +28,12 @@ const QUARTER_COUNT = 12
 
 export default {
   name: 'RevenueTrendChart',
+  components: { BaseChart },
   props: {
     companies: {
       type: Array,
       required: true,
     },
-  },
-  data() {
-    return {
-      chart: null,
-    }
   },
   computed: {
     labels() {
@@ -44,7 +46,7 @@ export default {
           .slice(-QUARTER_COUNT)
           .map((point) => toBillions(point.revenue))
 
-        // falls eine Firma weniger als 12 Quartale hat: vorne mit null auffuellen (Lücke in der Linie)
+        // falls eine Firma weniger als 12 Quartale hat: vorne mit null auffuellen
         while (values.length < QUARTER_COUNT) values.unshift(null)
 
         const latest = values[values.length - 1]
@@ -58,11 +60,8 @@ export default {
         }
       })
     },
-  },
-  mounted() {
-    this.chart = new Chart(this.$refs.canvas, {
-      type: 'line',
-      data: {
+    chartData() {
+      return {
         labels: this.labels,
         datasets: this.items.map((item) => ({
           label: item.name,
@@ -74,8 +73,10 @@ export default {
           pointHoverRadius: 4,
           tension: 0.3,
         })),
-      },
-      options: {
+      }
+    },
+    chartOptions() {
+      return {
         responsive: true,
         maintainAspectRatio: false,
         // Maus irgendwo -> naechstes Quartal, ALLE Datensaetze im Tooltip
@@ -107,11 +108,8 @@ export default {
             ticks: { color: '#ffffff', font: { size: 8, family: 'Rubik' } },
           },
         },
-      },
-    })
-  },
-  beforeUnmount() {
-    if (this.chart) this.chart.destroy()
+      }
+    },
   },
 }
 </script>
@@ -119,14 +117,15 @@ export default {
 <style scoped>
 .trend {
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
+  justify-content: center;
   gap: 20px;
   width: 100%;
 }
 
 .trend__chart {
-  flex: 1;
-  height: 270px;
+  flex: 1 1 220px;
   min-width: 0;
 }
 
@@ -137,7 +136,7 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 6px;
-  flex: none;
+  flex: 0 0 auto;
 }
 
 .trend__row {

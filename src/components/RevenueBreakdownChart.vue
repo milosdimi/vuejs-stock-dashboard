@@ -1,7 +1,13 @@
 <template>
   <div class="breakdown">
     <div class="breakdown__chart">
-      <canvas ref="canvas"></canvas>
+      <BaseChart
+        type="doughnut"
+        :chart-data="chartData"
+        :chart-options="chartOptions"
+        :height="240"
+        aria-label="Revenue Breakdown der Magnificent Seven als Donut-Chart"
+      />
     </div>
 
     <ul class="breakdown__legend">
@@ -16,22 +22,18 @@
 </template>
 
 <script>
-import Chart from 'chart.js/auto'
+import BaseChart from './BaseChart.vue'
 import { COMPANY_COLORS, orderCompanies } from '../utils/companyStyle'
 import { ttm, toBillions } from '../utils/metrics'
 
 export default {
   name: 'RevenueBreakdownChart',
+  components: { BaseChart },
   props: {
     companies: {
       type: Array,
       required: true,
     },
-  },
-  data() {
-    return {
-      chart: null,
-    }
   },
   computed: {
     // pro Firma: TTM-Umsatz + Farbe + jüngstes Quartal
@@ -49,11 +51,8 @@ export default {
         }
       })
     },
-  },
-  mounted() {
-    this.chart = new Chart(this.$refs.canvas, {
-      type: 'doughnut',
-      data: {
+    chartData() {
+      return {
         labels: this.items.map((item) => item.name),
         datasets: [
           {
@@ -63,8 +62,10 @@ export default {
             borderWidth: 1,
           },
         ],
-      },
-      options: {
+      }
+    },
+    chartOptions() {
+      return {
         responsive: true,
         maintainAspectRatio: false,
         cutout: '58%',
@@ -79,11 +80,8 @@ export default {
             },
           },
         },
-      },
-    })
-  },
-  beforeUnmount() {
-    if (this.chart) this.chart.destroy()
+      }
+    },
   },
 }
 </script>
@@ -92,6 +90,7 @@ export default {
 .breakdown {
   position: relative;
   display: flex;
+  flex-wrap: wrap;
   align-items: center;
   justify-content: center;
   gap: 32px;
@@ -100,7 +99,7 @@ export default {
 
 .breakdown__chart {
   width: 240px;
-  height: 240px;
+  max-width: 100%;
   flex: none;
 }
 

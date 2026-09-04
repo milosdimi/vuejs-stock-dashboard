@@ -1,11 +1,15 @@
 <template>
-  <div class="grouped">
-    <canvas ref="canvas"></canvas>
-  </div>
+  <BaseChart
+    type="bar"
+    :chart-data="chartData"
+    :chart-options="chartOptions"
+    :height="280"
+    aria-label="Umsatzwachstum YoY der letzten 4 Quartale je Firma als Balkendiagramm"
+  />
 </template>
 
 <script>
-import Chart from 'chart.js/auto'
+import BaseChart from './BaseChart.vue'
 import { yoyGrowth, formatQuarter } from '../utils/metrics'
 
 // Reihenfolge der Firmen auf der X-Achse (aus Figma)
@@ -18,16 +22,12 @@ const QUARTER_COUNT = 4
 
 export default {
   name: 'RevenueGrowthChart',
+  components: { BaseChart },
   props: {
     companies: {
       type: Array,
       required: true,
     },
-  },
-  data() {
-    return {
-      chart: null,
-    }
   },
   computed: {
     orderedCompanies() {
@@ -48,11 +48,8 @@ export default {
       if (!first) return []
       return first.points.map((point) => formatQuarter(point.quarter))
     },
-  },
-  mounted() {
-    this.chart = new Chart(this.$refs.canvas, {
-      type: 'bar',
-      data: {
+    chartData() {
+      return {
         labels: this.growthByCompany.map((company) => company.name),
         // ein Datensatz pro Quartals-Position -> gruppierte Balken
         datasets: this.quarterLabels.map((label, quarterIndex) => ({
@@ -62,18 +59,26 @@ export default {
           ),
           backgroundColor: QUARTER_SHADES[quarterIndex],
         })),
-      },
-      options: {
+      }
+    },
+    chartOptions() {
+      return {
         responsive: true,
         maintainAspectRatio: false,
         plugins: {
           legend: {
             position: 'right',
-            labels: { color: '#ffffff', font: { size: 10, family: 'Rubik' }, boxWidth: 32, boxHeight: 12 },
+            labels: {
+              color: '#ffffff',
+              font: { size: 10, family: 'Rubik' },
+              boxWidth: 32,
+              boxHeight: 12,
+            },
           },
           tooltip: {
             callbacks: {
-              label: (ctx) => `${ctx.dataset.label}: ${ctx.parsed.y == null ? '-' : ctx.parsed.y.toFixed(1)}%`,
+              label: (ctx) =>
+                `${ctx.dataset.label}: ${ctx.parsed.y == null ? '-' : ctx.parsed.y.toFixed(1)}%`,
             },
           },
         },
@@ -90,18 +95,8 @@ export default {
             ticks: { color: '#ffffff', font: { size: 8, family: 'Rubik' } },
           },
         },
-      },
-    })
-  },
-  beforeUnmount() {
-    if (this.chart) this.chart.destroy()
+      }
+    },
   },
 }
 </script>
-
-<style scoped>
-.grouped {
-  width: 100%;
-  height: 280px;
-}
-</style>

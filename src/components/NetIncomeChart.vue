@@ -1,17 +1,23 @@
 <template>
-  <div class="hbar">
-    <canvas ref="canvas"></canvas>
-  </div>
+  <BaseChart
+    type="bar"
+    :chart-data="chartData"
+    :chart-options="chartOptions"
+    :chart-plugins="plugins"
+    :height="280"
+    aria-label="Net Income TTM je Firma als Balkendiagramm"
+  />
 </template>
 
 <script>
-import Chart from 'chart.js/auto'
+import BaseChart from './BaseChart.vue'
 import ChartDataLabels from 'chartjs-plugin-datalabels'
 import { BLUE_SCALE } from '../utils/companyStyle'
 import { ttm, toBillions } from '../utils/metrics'
 
 export default {
   name: 'NetIncomeChart',
+  components: { BaseChart },
   props: {
     companies: {
       type: Array,
@@ -20,7 +26,7 @@ export default {
   },
   data() {
     return {
-      chart: null,
+      plugins: [ChartDataLabels],
     }
   },
   computed: {
@@ -33,12 +39,8 @@ export default {
         }))
         .sort((a, b) => b.value - a.value)
     },
-  },
-  mounted() {
-    this.chart = new Chart(this.$refs.canvas, {
-      type: 'bar',
-      plugins: [ChartDataLabels],
-      data: {
+    chartData() {
+      return {
         labels: this.rows.map((row) => row.name),
         datasets: [
           {
@@ -46,8 +48,10 @@ export default {
             backgroundColor: this.rows.map((row, index) => BLUE_SCALE[index]),
           },
         ],
-      },
-      options: {
+      }
+    },
+    chartOptions() {
+      return {
         indexAxis: 'y', // horizontale Balken
         responsive: true,
         maintainAspectRatio: false,
@@ -80,18 +84,8 @@ export default {
             ticks: { color: '#ffffff', font: { size: 10, family: 'Rubik' } },
           },
         },
-      },
-    })
-  },
-  beforeUnmount() {
-    if (this.chart) this.chart.destroy()
+      }
+    },
   },
 }
 </script>
-
-<style scoped>
-.hbar {
-  width: 100%;
-  height: 280px;
-}
-</style>

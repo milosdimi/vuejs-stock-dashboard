@@ -2,7 +2,23 @@
   <div class="dashboard">
     <header class="dashboard__header">
       <span class="dashboard__pill"></span>
-      <h1 class="dashboard__title">The Magnificent Seven Companies</h1>
+
+      <div class="dashboard__heading">
+        <h1 class="dashboard__title">The Magnificent Seven Companies</h1>
+        <p v-if="lastUpdatedText" class="dashboard__meta">
+          Stand: {{ lastUpdatedText }}
+        </p>
+      </div>
+
+      <button
+        type="button"
+        class="dashboard__refresh"
+        :disabled="loading"
+        title="Daten neu laden"
+        @click="loadData(true)"
+      >
+        <span class="material-symbols-rounded">refresh</span>
+      </button>
     </header>
 
     <template v-if="companies.length">
@@ -36,7 +52,16 @@
       </section>
     </template>
 
-    <p v-else class="dashboard__loading">Lade Daten &hellip;</p>
+    <p v-else-if="loading" class="dashboard__status">Lade Daten &hellip;</p>
+
+    <div v-else class="dashboard__status">
+      <p>Daten konnten nicht geladen werden.</p>
+      <button type="button" class="dashboard__retry" @click="loadData()">
+        Erneut versuchen
+      </button>
+    </div>
+
+    <AppFooter />
   </div>
 </template>
 
@@ -48,7 +73,8 @@ import RevenueBreakdownChart from "./components/RevenueBreakdownChart.vue";
 import NetIncomeChart from "./components/NetIncomeChart.vue";
 import GrossMarginChart from "./components/GrossMarginChart.vue";
 import RevenueGrowthChart from "./components/RevenueGrowthChart.vue";
-import stockService from "./services/StockService";
+import AppFooter from "./components/AppFooter.vue";
+import stockService, { getLastUpdated } from "./services/StockService";
 
 export default {
   name: "App",
@@ -60,14 +86,42 @@ export default {
     NetIncomeChart,
     GrossMarginChart,
     RevenueGrowthChart,
+    AppFooter,
   },
   data() {
     return {
       companies: [],
+      loading: true,
+      error: false,
+      lastUpdated: null,
     };
   },
-  async created() {
-    this.companies = await stockService.getAllCompanyHistories();
+  computed: {
+    lastUpdatedText() {
+      if (!this.lastUpdated) return "";
+      return new Intl.DateTimeFormat("de-DE", {
+        dateStyle: "short",
+        timeStyle: "short",
+      }).format(this.lastUpdated);
+    },
+  },
+  created() {
+    this.loadData();
+  },
+  methods: {
+    async loadData(force = false) {
+      this.loading = true;
+      this.error = false;
+      try {
+        this.companies = await stockService.getAllCompanyHistories({ force });
+        this.lastUpdated = getLastUpdated();
+      } catch (err) {
+        this.error = true;
+        console.error("Daten konnten nicht geladen werden", err);
+      } finally {
+        this.loading = false;
+      }
+    },
   },
 };
 </script>
@@ -81,7 +135,7 @@ export default {
 .dashboard__header {
   display: flex;
   align-items: center;
-  gap: 24px;
+  gap: clamp(12px, 3vw, 24px);
   margin-bottom: 40px;
 }
 
@@ -97,37 +151,98 @@ export default {
   padding-left: calc(50vw - 50%);
 }
 
+.dashboard__heading {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
 .dashboard__title {
   margin: 0;
   font-weight: 500;
-  font-size: 36px;
-  line-height: 43px;
+  font-size: clamp(24px, 5vw, 36px);
+  line-height: 1.2;
   color: #f9f9f9;
+}
+
+.dashboard__meta {
+  margin: 0;
+  font-size: 12px;
+  color: rgba(255, 255, 255, 0.5);
+}
+
+.dashboard__refresh {
+  margin-left: auto;
+  flex: none;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  border: none;
+  border-radius: 50%;
+  background: var(--color-panel);
+  color: var(--color-text);
+  cursor: pointer;
+}
+
+.dashboard__refresh:hover:not(:disabled) {
+  background: var(--color-accent);
+  color: var(--color-card);
+}
+
+.dashboard__refresh:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 
 .dashboard__row {
   display: flex;
+  flex-wrap: wrap;
   gap: 32px;
   margin-top: 32px;
 }
 
+/* flex-grow proportional zur Figma-Breite, flex-basis 0 -> exakte Verhältnisse
+   auf breiten Screens; min-width lässt die Karten auf schmalen umbrechen. */
 .dashboard__card--wide {
-  width: 714px;
+  flex: 714 1 0%;
+  min-width: 320px;
 }
 
 .dashboard__card--narrow {
-  width: 494px;
+  flex: 494 1 0%;
+  min-width: 320px;
 }
 
 .dashboard__card--w4 {
-  width: 392px;
+  flex: 392 1 0%;
+  min-width: 280px;
 }
 
 .dashboard__card--w5 {
-  width: 293px;
+  flex: 293 1 0%;
+  min-width: 240px;
 }
 
 .dashboard__card--w6 {
-  width: 491px;
+  flex: 491 1 0%;
+  min-width: 320px;
+}
+
+.dashboard__status {
+  margin-top: 40px;
+}
+
+.dashboard__retry {
+  margin-top: 8px;
+  padding: 8px 16px;
+  border: none;
+  border-radius: 8px;
+  background: var(--color-accent);
+  color: var(--color-card);
+  font-family: var(--font-base);
+  font-weight: 500;
+  cursor: pointer;
 }
 </style>

@@ -25,9 +25,10 @@ export default {
   display: flex;
   flex-direction: column;
   gap: 20px;
-  padding: 20px 32px;
+  padding: 20px clamp(16px, 3vw, 32px);
   background: var(--color-card);
   border-radius: var(--radius-card);
+  min-width: 0;
 }
 
 .card__title {
@@ -42,5 +43,6 @@ export default {
   flex: 1;
   align-items: center;
   justify-content: center;
+  min-width: 0; /* erlaubt den Charts, in schmalen Karten zu schrumpfen */
 }
 </style>

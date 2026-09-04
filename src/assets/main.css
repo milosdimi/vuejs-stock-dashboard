@@ -35,7 +35,8 @@ body {
 
 #app {
   min-height: 100vh;
-  padding: 40px 24px;
+  /* Abstand skaliert mit dem Viewport: eng auf dem Handy, großzügig am Desktop */
+  padding: clamp(16px, 4vw, 40px) clamp(16px, 3vw, 24px);
   background: radial-gradient(
     71.11% 100% at 50% 0%,
     #020204 14.6%,

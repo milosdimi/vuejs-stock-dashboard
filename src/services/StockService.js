@@ -99,8 +99,55 @@ export default {
     }
   },
 
-  // Alle 7 Firmen parallel
-  getAllCompanyHistories() {
-    return Promise.all(COMPANIES.map((company) => this.getCompanyHistory(company.symbol)))
+  // Alle 7 Firmen - aus dem Cache, sonst frisch holen (7 Requests).
+  async getAllCompanyHistories({ force = false } = {}) {
+    if (!force) {
+      const cached = readCache()
+      if (cached) return cached
+    }
+
+    const result = await Promise.all(
+      COMPANIES.map((company) => this.getCompanyHistory(company.symbol)),
+    )
+    writeCache(result)
+    return result
   },
+}
+
+// ---- Cache (localStorage) -------------------------------------------------
+// SheetDB Free = ~500 Requests/Monat, 7 pro Laden. Antwort 1 Stunde cachen.
+
+const CACHE_KEY = 'magnificent-seven'
+const CACHE_TTL_MS = 60 * 60 * 1000 // 1 Stunde
+
+function readCache() {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY)
+    if (!raw) return null
+    const { timestamp, data } = JSON.parse(raw)
+    if (Date.now() - timestamp > CACHE_TTL_MS) return null
+    return data
+  } catch (error) {
+    console.warn('Cache konnte nicht gelesen werden', error)
+    return null
+  }
+}
+
+function writeCache(data) {
+  try {
+    localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), data }))
+  } catch (error) {
+    console.warn('Cache konnte nicht geschrieben werden', error)
+  }
+}
+
+// Wann wurden die Daten zuletzt frisch geholt? (Date oder null)
+export function getLastUpdated() {
+  try {
+    const raw = localStorage.getItem(CACHE_KEY)
+    if (!raw) return null
+    return new Date(JSON.parse(raw).timestamp)
+  } catch (error) {
+    return null
+  }
 }
