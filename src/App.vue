@@ -5,19 +5,41 @@
       <h1 class="dashboard__title">The Magnificent Seven Companies</h1>
     </header>
 
-    <CompanyOverview v-if="companies.length" :companies="companies" />
+    <template v-if="companies.length">
+      <CompanyOverview :companies="companies" />
+
+      <section class="dashboard__row">
+        <BaseCard title="Revenue last 3 years" class="dashboard__card--wide">
+          <RevenueTrendChart :companies="companies" />
+        </BaseCard>
+
+        <BaseCard
+          title="Revenue Breakdown Magnificent Seven"
+          class="dashboard__card--narrow"
+        >
+          <RevenueBreakdownChart :companies="companies" />
+        </BaseCard>
+      </section>
+    </template>
+
     <p v-else class="dashboard__loading">Lade Daten &hellip;</p>
   </div>
 </template>
 
 <script>
 import CompanyOverview from "./components/CompanyOverview.vue";
+import BaseCard from "./components/BaseCard.vue";
+import RevenueTrendChart from "./components/RevenueTrendChart.vue";
+import RevenueBreakdownChart from "./components/RevenueBreakdownChart.vue";
 import stockService from "./services/StockService";
 
 export default {
   name: "App",
   components: {
     CompanyOverview,
+    BaseCard,
+    RevenueTrendChart,
+    RevenueBreakdownChart,
   },
   data() {
     return {
@@ -55,5 +77,24 @@ export default {
   font-weight: 700;
   font-size: 40px;
   line-height: 1.2;
+}
+
+.dashboard__row {
+  display: flex;
+  gap: 32px;
+  margin-top: 32px;
+}
+
+.dashboard__card--wide {
+  width: 714px;
+}
+
+.dashboard__card--narrow {
+  width: 494px;
+}
+
+.dashboard__todo {
+  margin: 0;
+  opacity: 0.5;
 }
 </style>

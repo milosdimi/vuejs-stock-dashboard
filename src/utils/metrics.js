@@ -25,6 +25,36 @@ export function currentRevenue(quarters) {
   }
 }
 
+// Liste der letzten `count` abgeschlossenen Kalenderquartale, z.B. ["Q3 2023", ..., "Q2 2026"].
+// Gemeinsame X-Achse fuer den Line Chart - die Firmen werden per Position darauf gelegt.
+export function lastCalendarQuarters(count) {
+  const now = new Date()
+  let year = now.getFullYear()
+  let quarter = Math.floor(now.getMonth() / 3) + 1 // 1..4, aktuelles Quartal
+  quarter -= 1 // letztes abgeschlossenes
+  if (quarter === 0) {
+    quarter = 4
+    year -= 1
+  }
+
+  const labels = []
+  for (let i = 0; i < count; i++) {
+    labels.unshift(`Q${quarter} ${year}`)
+    quarter -= 1
+    if (quarter === 0) {
+      quarter = 4
+      year -= 1
+    }
+  }
+  return labels
+}
+
+// Trailing Twelve Months: Summe der letzten 4 Quartale einer Kennzahl.
+export function ttm(quarters, key = 'revenue') {
+  if (!quarters || quarters.length < 4) return null
+  return quarters.slice(-4).reduce((sum, point) => sum + (point[key] || 0), 0)
+}
+
 // "26Q2" -> "Q2 2026"   |   "Q1 2024" bleibt   |   "Q4-26" -> "Q4 2026"
 export function formatQuarter(label) {
   if (!label) return ''
