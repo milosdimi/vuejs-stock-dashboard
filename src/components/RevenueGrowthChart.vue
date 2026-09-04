@@ -4,18 +4,18 @@
     :chart-data="chartData"
     :chart-options="chartOptions"
     :height="280"
-    aria-label="Umsatzwachstum YoY der letzten 4 Quartale je Firma als Balkendiagramm"
+    aria-label="Revenue growth YoY of the last 4 quarters per company as a bar chart"
   />
 </template>
 
 <script>
 import BaseChart from './BaseChart.vue'
-import { yoyGrowth, formatQuarter } from '../utils/metrics'
+import { yoyGrowth, toCalendarQuarter } from '../utils/metrics'
 
-// Reihenfolge der Firmen auf der X-Achse (aus Figma)
+// Company order on the X-axis (from Figma)
 const X_ORDER = ['AAPL', 'MSFT', 'AMZN', 'GOOG', 'META', 'TSLA', 'NVDA']
 
-// 4 Blautoene: aeltestes Quartal hell -> aktuelles Quartal dunkel
+// 4 shades: oldest quarter light -> current quarter dark
 const QUARTER_SHADES = ['#39daff', '#29a5c5', '#196f8c', '#093a52']
 
 const QUARTER_COUNT = 4
@@ -35,29 +35,32 @@ export default {
         this.companies.find((company) => company.symbol === symbol),
       ).filter(Boolean)
     },
-    // pro Firma: YoY-Wachstum der letzten 4 Quartale (aeltestes zuerst)
     growthByCompany() {
       return this.orderedCompanies.map((company) => ({
         name: company.name,
         points: yoyGrowth(company.quarters, QUARTER_COUNT),
       }))
     },
-    // Labels der 4 Quartals-Positionen (von der ersten Firma)
     quarterLabels() {
-      const first = this.growthByCompany[0]
+      const first = this.orderedCompanies[0]
       if (!first) return []
-      return first.points.map((point) => formatQuarter(point.quarter))
+      return this.growthByCompany[0].points.map((point) =>
+        toCalendarQuarter(first.symbol, point.quarter),
+      )
     },
     chartData() {
       return {
         labels: this.growthByCompany.map((company) => company.name),
-        // ein Datensatz pro Quartals-Position -> gruppierte Balken
+        // one dataset per quarter position -> grouped bars
         datasets: this.quarterLabels.map((label, quarterIndex) => ({
           label,
           data: this.growthByCompany.map(
             (company) => company.points[quarterIndex]?.growth ?? null,
           ),
           backgroundColor: QUARTER_SHADES[quarterIndex],
+          borderColor: '#ffffff',
+          borderWidth: 1,
+          borderSkipped: false,
         })),
       }
     },

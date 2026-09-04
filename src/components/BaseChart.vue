@@ -8,10 +8,8 @@
 import { markRaw } from 'vue'
 import Chart from 'chart.js/auto'
 
-// Zentraler Wrapper um Chart.js:
-// - erstellt/zerstoert das Chart im Lifecycle
-// - baut das Chart bei Daten-Aenderungen sauber neu auf
-// - rendert bei Browser-Zoom neu (devicePixelRatio-Fix -> keine unscharfe Canvas)
+// Wraps Chart.js: creates/destroys it on the lifecycle, rebuilds it when the
+// data changes, and re-renders on browser zoom (devicePixelRatio fix).
 export default {
   name: 'BaseChart',
   props: {
@@ -31,7 +29,7 @@ export default {
       type: Array,
       default: () => [],
     },
-    // Hoehe in px; ohne Angabe fuellt das Chart die Hoehe des Elternelements
+    // height in px; without it the chart fills the parent's height
     height: {
       type: Number,
       default: null,
@@ -70,8 +68,8 @@ export default {
   methods: {
     buildChart() {
       this.destroyChart()
-      // markRaw: Chart.js-Instanz NICHT reaktiv machen, sonst kollidiert
-      // Vues Proxy mit Chart.js' eigener interner Proxy-Logik.
+      // markRaw: keep the Chart.js instance out of Vue's reactivity, otherwise
+      // its proxy clashes with Chart.js' own internal proxying.
       this.chart = markRaw(
         new Chart(this.$refs.canvas, {
           type: this.type,
@@ -87,8 +85,8 @@ export default {
         this.chart = null
       }
     },
-    // Browser-Zoom aendert devicePixelRatio, nicht die CSS-Groesse -> Chart.js
-    // neu vermessen lassen, sonst bleibt die Canvas in alter Aufloesung (unscharf).
+    // Browser zoom changes devicePixelRatio but not the CSS size, so force a
+    // re-measure or the canvas stays at the old resolution (blurry).
     handleResize() {
       if (this.chart) this.chart.resize()
     },

@@ -6,7 +6,7 @@
         :chart-data="chartData"
         :chart-options="chartOptions"
         :height="240"
-        aria-label="Revenue Breakdown der Magnificent Seven als Donut-Chart"
+        aria-label="Revenue breakdown of the Magnificent Seven as a donut chart"
       />
     </div>
 
@@ -36,7 +36,6 @@ export default {
     },
   },
   computed: {
-    // pro Firma: TTM-Umsatz + Farbe + jüngstes Quartal
     items() {
       return orderCompanies(this.companies).map((company) => {
         const ttmRevenue = ttm(company.quarters, 'revenue')

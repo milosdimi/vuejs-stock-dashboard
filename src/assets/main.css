@@ -1,4 +1,4 @@
-/* ---- Design-Tokens: einmal definiert, ueberall via var(--...) genutzt ---- */
+/* Design tokens */
 :root {
   --color-text: #ffffff;
   --color-card: #011f35;
@@ -22,7 +22,7 @@
   box-sizing: border-box;
 }
 
-/* Scrollbar-Platz immer reservieren -> 100vw == Inhaltsbreite, kein Wackeln */
+/* Reserve scrollbar space so 100vw always equals the content width */
 html {
   scrollbar-gutter: stable;
 }
@@ -35,7 +35,6 @@ body {
 
 #app {
   min-height: 100vh;
-  /* Abstand skaliert mit dem Viewport: eng auf dem Handy, großzügig am Desktop */
   padding: clamp(16px, 4vw, 40px) clamp(16px, 3vw, 24px);
   background: radial-gradient(
     71.11% 100% at 50% 0%,
@@ -44,7 +43,7 @@ body {
   );
 }
 
-/* Material Symbols: Icon-Name als Text -> Icon */
+/* Material Symbols: renders the icon name text as an icon */
 .material-symbols-rounded {
   font-family: "Material Symbols Rounded";
   font-weight: normal;

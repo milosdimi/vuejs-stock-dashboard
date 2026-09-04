@@ -43,6 +43,6 @@ export default {
   flex: 1;
   align-items: center;
   justify-content: center;
-  min-width: 0; /* erlaubt den Charts, in schmalen Karten zu schrumpfen */
+  min-width: 0; /* lets charts shrink inside narrow cards */
 }
 </style>

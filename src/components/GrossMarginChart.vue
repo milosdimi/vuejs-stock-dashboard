@@ -5,7 +5,7 @@
     :chart-options="chartOptions"
     :chart-plugins="plugins"
     :height="280"
-    aria-label="Gross Margin des letzten Quartals je Firma als Balkendiagramm"
+    aria-label="Gross margin of the latest quarter per company as a bar chart"
   />
 </template>
 
@@ -30,7 +30,6 @@ export default {
     }
   },
   computed: {
-    // Rohmarge % des zuletzt gemeldeten Quartals, absteigend sortiert
     rows() {
       return this.companies
         .map((company) => {
@@ -50,6 +49,9 @@ export default {
           {
             data: this.rows.map((row) => row.value),
             backgroundColor: this.rows.map((row, index) => BLUE_SCALE[index]),
+            borderColor: '#ffffff',
+            borderWidth: 1,
+            borderSkipped: false,
           },
         ],
       }
@@ -71,7 +73,6 @@ export default {
           },
           tooltip: {
             callbacks: {
-              // Kontext: aus welchem Quartal stammt die Marge
               label: (ctx) => `${ctx.parsed.x.toFixed(1)}%  (${this.rows[ctx.dataIndex].quarter})`,
             },
           },

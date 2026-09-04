@@ -1,10 +1,8 @@
 import axios from 'axios'
 
-// Basis-URL des SheetDB-Endpoints (das ganze Google Sheet)
 const API_BASE_URL = 'https://sheetdb.io/api/v1/gfun0y0rgcz38'
 
-// Die "Magnificent Seven".
-// symbol = Ticker, im Sheet heissen die Tabs $AAPL, $AMZN, ...
+// The "Magnificent Seven". Each company is a sheet tab named $AAPL, $AMZN, ...
 export const COMPANIES = [
   { symbol: 'AAPL', name: 'Apple' },
   { symbol: 'AMZN', name: 'Amazon' },
@@ -15,11 +13,9 @@ export const COMPANIES = [
   { symbol: 'TSLA', name: 'Tesla' },
 ]
 
-// In welcher ZEILE des jeweiligen Firmen-Tabs steht welche Kennzahl?
-// Jedes Tab ist anders aufgebaut -> pro Firma eigene Zeilen.
-// Die Zahl ist der Index im rows-Array (0-basiert). Sheet-Zeile = Index + 2,
-// weil SheetDB Zeile 1 als Spalten-Header nimmt.
-// Verifiziert gegen echte Quartalszahlen, Stand August 2026.
+// Which row holds which metric per company tab. Values are 0-based indexes into
+// the rows array (sheet row = index + 2, SheetDB uses row 1 as the header).
+// Verified against real quarterly figures (Aug 2026).
 export const METRIC_ROWS = {
   AAPL: { revenue: 7, netIncome: 34, grossMargin: 21 },
   AMZN: { revenue: 7, netIncome: 39, grossMargin: 13 },
@@ -30,28 +26,24 @@ export const METRIC_ROWS = {
   TSLA: { revenue: 13, netIncome: 47, grossMargin: 27 },
 }
 
-// Wie viele der letzten Quartals-Spalten wir behalten.
-// Aeltere Spalten im Sheet haben teils unsaubere oder fehlende Labels.
+// Older sheet columns have missing or malformed labels, so keep only the latest ones.
 const QUARTERS_TO_KEEP = 12
 
-// Eigene axios-Instanz: baseURL wird jeder Anfrage automatisch vorangestellt
 const apiClient = axios.create({
   baseURL: API_BASE_URL,
 })
 
-// Wandelt einen rohen Sheet-Wert in eine Zahl um.
-// "1,234" -> 1234   "(538)" -> -538   "39.8%" -> 39.8   "" / "#DIV/0!" -> null
+// Parses a raw sheet value into a number.
+// "1,234" -> 1234 | "(538)" -> -538 | "39.8%" -> 39.8 | "" / "#DIV/0!" -> null
 export function parseNumber(raw) {
   if (raw == null) return null
 
   let text = String(raw).trim()
   if (text === '' || text.startsWith('#')) return null
 
-  // Klammern = negative Zahl (Buchhalter-Schreibweise)
   const isNegative = text.startsWith('(') && text.endsWith(')')
   if (isNegative) text = text.slice(1, -1)
 
-  // $, %, Leerzeichen und Tausender-Kommas entfernen
   text = text.replace(/[$%\s,]/g, '')
 
   const number = Number(text)
@@ -60,15 +52,15 @@ export function parseNumber(raw) {
   return isNegative ? -number : number
 }
 
-// Rohe SheetDB-Zeilen einer Firma -> saubere, chronologisch sortierte Quartals-Punkte.
-// Ergebnis: [{ quarter: '26Q2', revenue: 111184, netIncome: 29578, grossMargin: 49.3 }, ...]
+// Raw SheetDB rows for one company -> sorted quarterly points:
+// [{ quarter, revenue, netIncome, grossMargin }, ...]
 function toQuarterlyPoints(symbol, rows) {
-  const columnKeys = Object.keys(rows[0]) // Spalten stehen im Sheet schon chronologisch
-  const quarterLabelRow = rows[1] // Sheet-Zeile 3 = Quartals-Bezeichnungen (21Q1, 21Q2, ...)
+  const columnKeys = Object.keys(rows[0]) // already in chronological order
+  const quarterLabelRow = rows[1]
   const metricRows = METRIC_ROWS[symbol]
 
   return columnKeys
-    .slice(-QUARTERS_TO_KEEP) // nur die letzten N Quartale
+    .slice(-QUARTERS_TO_KEEP)
     .map((key) => ({
       quarter: (quarterLabelRow[key] || '').trim(),
       revenue: parseNumber(rows[metricRows.revenue][key]),
@@ -79,8 +71,7 @@ function toQuarterlyPoints(symbol, rows) {
 }
 
 export default {
-  // sheet = voller Tab-Name inkl. $, z.B. '$AAPL'
-  // -> GET .../gfun0y0rgcz38?sheet=$AAPL, liefert die rohen Zeilen
+  // sheet = full tab name incl. $, e.g. '$AAPL'
   async fetchData(sheet) {
     const response = await apiClient.get('', {
       params: { sheet },
@@ -88,7 +79,6 @@ export default {
     return response.data
   },
 
-  // Eine Firma: holen + parsen + sortieren
   async getCompanyHistory(symbol) {
     const rows = await this.fetchData(`$${symbol}`)
     const company = COMPANIES.find((item) => item.symbol === symbol)
@@ -99,7 +89,7 @@ export default {
     }
   },
 
-  // Alle 7 Firmen - aus dem Cache, sonst frisch holen (7 Requests).
+  // All 7 companies, from cache when fresh (otherwise 7 requests).
   async getAllCompanyHistories({ force = false } = {}) {
     if (!force) {
       const cached = readCache()
@@ -114,11 +104,11 @@ export default {
   },
 }
 
-// ---- Cache (localStorage) -------------------------------------------------
-// SheetDB Free = ~500 Requests/Monat, 7 pro Laden. Antwort 1 Stunde cachen.
+// ---- Cache (localStorage) -----------------------------------------------------
+// SheetDB free tier is ~500 requests/month, 7 per load, so cache for one hour.
 
 const CACHE_KEY = 'magnificent-seven'
-const CACHE_TTL_MS = 60 * 60 * 1000 // 1 Stunde
+const CACHE_TTL_MS = 60 * 60 * 1000
 
 function readCache() {
   try {
@@ -128,7 +118,7 @@ function readCache() {
     if (Date.now() - timestamp > CACHE_TTL_MS) return null
     return data
   } catch (error) {
-    console.warn('Cache konnte nicht gelesen werden', error)
+    console.warn('Could not read cache', error)
     return null
   }
 }
@@ -137,11 +127,11 @@ function writeCache(data) {
   try {
     localStorage.setItem(CACHE_KEY, JSON.stringify({ timestamp: Date.now(), data }))
   } catch (error) {
-    console.warn('Cache konnte nicht geschrieben werden', error)
+    console.warn('Could not write cache', error)
   }
 }
 
-// Wann wurden die Daten zuletzt frisch geholt? (Date oder null)
+// When the data was last fetched fresh (Date or null).
 export function getLastUpdated() {
   try {
     const raw = localStorage.getItem(CACHE_KEY)

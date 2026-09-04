@@ -146,7 +146,6 @@ export default {
   height: 32px;
   border-radius: 0 100px 100px 0;
   background: var(--color-accent);
-  /* linke Kante bis zum Viewport-Rand ziehen; die Breite im Flex-Flow bleibt 96px */
   margin-left: calc(50% - 50vw);
   padding-left: calc(50vw - 50%);
 }
@@ -203,8 +202,6 @@ export default {
   margin-top: 32px;
 }
 
-/* flex-grow proportional zur Figma-Breite, flex-basis 0 -> exakte Verhältnisse
-   auf breiten Screens; min-width lässt die Karten auf schmalen umbrechen. */
 .dashboard__card--wide {
   flex: 714 1 0%;
   min-width: 320px;

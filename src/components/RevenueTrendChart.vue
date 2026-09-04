@@ -6,7 +6,7 @@
         :chart-data="chartData"
         :chart-options="chartOptions"
         :height="270"
-        aria-label="Umsatzentwicklung der Magnificent Seven ueber die letzten 3 Jahre"
+        aria-label="Revenue trend of the Magnificent Seven over the last 3 years"
       />
     </div>
 
@@ -22,7 +22,7 @@
 <script>
 import BaseChart from './BaseChart.vue'
 import { COMPANY_COLORS, orderCompanies } from '../utils/companyStyle'
-import { toBillions, lastCalendarQuarters } from '../utils/metrics'
+import { toBillions, lastCalendarQuarters, toCalendarQuarter } from '../utils/metrics'
 
 const QUARTER_COUNT = 12
 
@@ -39,17 +39,19 @@ export default {
     labels() {
       return lastCalendarQuarters(QUARTER_COUNT)
     },
-    // pro Firma: 12 Umsatzwerte (Mrd $), auf die gemeinsame Achse gelegt
+    // Per company: revenue (billions) placed on the shared calendar axis.
     items() {
       return orderCompanies(this.companies).map((company) => {
-        const values = company.quarters
-          .slice(-QUARTER_COUNT)
-          .map((point) => toBillions(point.revenue))
+        const byQuarter = {}
+        company.quarters.forEach((point) => {
+          const calendar = toCalendarQuarter(company.symbol, point.quarter)
+          byQuarter[calendar] = toBillions(point.revenue)
+        })
 
-        // falls eine Firma weniger als 12 Quartale hat: vorne mit null auffuellen
-        while (values.length < QUARTER_COUNT) values.unshift(null)
-
-        const latest = values[values.length - 1]
+        const values = this.labels.map((label) =>
+          label in byQuarter ? byQuarter[label] : null,
+        )
+        const latest = [...values].reverse().find((value) => value != null)
 
         return {
           symbol: company.symbol,
@@ -79,7 +81,7 @@ export default {
       return {
         responsive: true,
         maintainAspectRatio: false,
-        // Maus irgendwo -> naechstes Quartal, ALLE Datensaetze im Tooltip
+        // hover anywhere -> tooltip shows the nearest quarter for all datasets
         interaction: { mode: 'index', intersect: false },
         plugins: {
           legend: { display: false },

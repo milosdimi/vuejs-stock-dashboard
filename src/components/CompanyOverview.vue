@@ -56,7 +56,6 @@ export default {
     clearTimeout(this.scrollTimer)
   },
   methods: {
-    // true, wenn der Inhalt breiter ist als der sichtbare Bereich
     canScroll() {
       const el = this.$refs.scroller
       return el.scrollWidth > el.clientWidth
@@ -74,7 +73,7 @@ export default {
       }, 700)
     },
 
-    // vertikales Mausrad -> horizontal scrollen
+    // Wheel-scroll the row horizontally
     onWheel(event) {
       if (event.deltaY === 0 || !this.canScroll()) return
       event.preventDefault()
@@ -118,7 +117,7 @@ export default {
   overflow-x: auto;
   cursor: grab;
 
-  /* Firefox: dünne Scrollbar, im Ruhezustand unsichtbar */
+  /* Firefox: thin scrollbar, hidden until scrolling/dragging */
   scrollbar-width: thin;
   scrollbar-color: transparent transparent;
   transition: scrollbar-color 0.3s ease;

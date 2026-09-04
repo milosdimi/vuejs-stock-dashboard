@@ -1,13 +1,11 @@
-// Kleine Rechen-Helfer fuer die Kennzahlen.
-// Die Rohdaten stehen in Millionen $ - fuer die Anzeige rechnen wir in Milliarden.
+// Metric helpers. Raw values are in millions USD; display is in billions.
 
 export function toBillions(millions) {
   if (millions == null) return null
   return millions / 1000
 }
 
-// Nimmt die quarters-Liste einer Firma und liefert das aktuelle Quartal
-// plus die Veraenderung zum Vorquartal (absolut + relativ in %).
+// Latest quarter plus change vs. the previous quarter (absolute + percent).
 export function currentRevenue(quarters) {
   if (!quarters || quarters.length < 2) return null
 
@@ -25,13 +23,11 @@ export function currentRevenue(quarters) {
   }
 }
 
-// Liste der letzten `count` abgeschlossenen Kalenderquartale, z.B. ["Q3 2023", ..., "Q2 2026"].
-// Gemeinsame X-Achse fuer den Line Chart - die Firmen werden per Position darauf gelegt.
+// The last `count` completed calendar quarters, e.g. ["Q3 2023", ..., "Q2 2026"].
 export function lastCalendarQuarters(count) {
   const now = new Date()
   let year = now.getFullYear()
-  let quarter = Math.floor(now.getMonth() / 3) + 1 // 1..4, aktuelles Quartal
-  quarter -= 1 // letztes abgeschlossenes
+  let quarter = Math.floor(now.getMonth() / 3) // last completed quarter (1..4)
   if (quarter === 0) {
     quarter = 4
     year -= 1
@@ -49,14 +45,14 @@ export function lastCalendarQuarters(count) {
   return labels
 }
 
-// Trailing Twelve Months: Summe der letzten 4 Quartale einer Kennzahl.
+// Trailing twelve months: sum of the last 4 quarters of a metric.
 export function ttm(quarters, key = 'revenue') {
   if (!quarters || quarters.length < 4) return null
   return quarters.slice(-4).reduce((sum, point) => sum + (point[key] || 0), 0)
 }
 
-// YoY-Wachstum: die letzten `count` Quartale, jedes vs. dem gleichen Quartal ein Jahr davor (4 Positionen zurueck).
-// Ergebnis: [{ quarter: '26Q1', growth: 15.7 }, ...] aeltestes zuerst.
+// Year-over-year growth for the last `count` quarters, each vs. 4 quarters back.
+// Returns [{ quarter, growth }, ...], oldest first.
 export function yoyGrowth(quarters, count = 4) {
   const result = []
   for (let i = quarters.length - count; i < quarters.length; i++) {
@@ -71,15 +67,42 @@ export function yoyGrowth(quarters, count = 4) {
   return result
 }
 
-// "26Q2" -> "Q2 2026"   |   "Q1 2024" bleibt   |   "Q4-26" -> "Q4 2026"
+// "26Q2" -> "Q2 2026" | "Q4-26" -> "Q4 2026" | "Q1 2024" -> unchanged
 export function formatQuarter(label) {
   if (!label) return ''
 
-  const compact = label.match(/^(\d{2})Q(\d)$/) // 26Q2
+  const compact = label.match(/^(\d{2})Q(\d)$/)
   if (compact) return `Q${compact[2]} 20${compact[1]}`
 
-  const dashed = label.match(/^Q(\d)-(\d{2})$/) // Q4-26
+  const dashed = label.match(/^Q(\d)-(\d{2})$/)
   if (dashed) return `Q${dashed[1]} 20${dashed[2]}`
 
   return label
+}
+
+// Fiscal-to-calendar shift in quarters: Apple FY ends Sept (-1),
+// Microsoft FY ends June (-2), Nvidia FY ends Jan with the year label one ahead (-4).
+const FISCAL_OFFSET = { AAPL: -1, MSFT: -2, NVDA: -4 }
+
+function parseQuarterLabel(label) {
+  let m
+  if ((m = label.match(/^(\d{2})Q(\d+)$/))) return { year: 2000 + Number(m[1]), q: Number(m[2]) }
+  if ((m = label.match(/^Q(\d)-(\d{2})$/))) return { year: 2000 + Number(m[2]), q: Number(m[1]) }
+  if ((m = label.match(/^Q(\d)\s+(\d{4})$/))) return { year: Number(m[2]), q: Number(m[1]) }
+  return null
+}
+
+// Company quarter label -> real calendar quarter, e.g. ('NVDA', '27Q1') -> 'Q1 2026'.
+// Works through a running quarter index, which also normalises broken labels
+// such as Tesla's '25Q6' -> 'Q2 2026'.
+export function toCalendarQuarter(symbol, label) {
+  const parsed = parseQuarterLabel(label)
+  if (!parsed) return label
+
+  const offset = FISCAL_OFFSET[symbol] || 0
+  const index = parsed.year * 4 + parsed.q + offset
+
+  const year = Math.floor((index - 1) / 4)
+  const quarter = ((index - 1) % 4) + 1
+  return `Q${quarter} ${year}`
 }

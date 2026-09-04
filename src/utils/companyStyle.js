@@ -1,5 +1,5 @@
-// Feste Farbe und Anzeige-Reihenfolge je Firma - aus dem Figma-Design.
-// Blau-Verlauf von hell (Meta) nach dunkel (Amazon).
+// Per-company colour and display order, from the Figma design.
+// Blue gradient from light (Meta) to dark (Amazon).
 
 export const COMPANY_COLORS = {
   META: '#39daff',
@@ -11,10 +11,9 @@ export const COMPANY_COLORS = {
   AMZN: '#093a52',
 }
 
-// Reihenfolge in Charts und Legenden
 export const COMPANY_ORDER = ['META', 'TSLA', 'NVDA', 'MSFT', 'AAPL', 'GOOG', 'AMZN']
 
-// Blau-Verlauf hell -> dunkel, als geordnete Palette (z.B. fuer sortierte Balken)
+// Same gradient as an ordered palette, for rank-coloured bars.
 export const BLUE_SCALE = [
   '#39daff',
   '#31bfe2',
@@ -25,7 +24,6 @@ export const BLUE_SCALE = [
   '#093a52',
 ]
 
-// Bringt die geladenen Firmen in die Figma-Reihenfolge
 export function orderCompanies(companies) {
   return COMPANY_ORDER.map((symbol) =>
     companies.find((company) => company.symbol === symbol),

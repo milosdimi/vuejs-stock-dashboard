@@ -44,7 +44,6 @@ export default {
     },
   },
   computed: {
-    // { quarter, revenue, absoluteChange, relativeChange } oder null
     current() {
       return currentRevenue(this.company.quarters)
     },
@@ -62,7 +61,7 @@ export default {
     },
     absoluteChangeText() {
       const value = toBillions(this.current.absoluteChange).toFixed(2)
-      return this.isPositive ? `+${value}` : value // negativ hat schon ein "-"
+      return this.isPositive ? `+${value}` : value
     },
     relativeChangeText() {
       return this.current.relativeChange.toFixed(2)

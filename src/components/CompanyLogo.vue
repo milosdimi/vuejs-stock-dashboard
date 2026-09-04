@@ -3,8 +3,7 @@
 </template>
 
 <script>
-// Jedes Logo einzeln importieren. webpack macht daraus fertige URLs.
-// Verschiedene Dateiendungen (.svg / .png) sind so kein Problem.
+// Import each logo explicitly so mixed file types (.svg / .png) just work.
 import AAPL from '@/assets/logos/AAPL.svg'
 import AMZN from '@/assets/logos/AMZN.svg'
 import GOOG from '@/assets/logos/GOOG.svg'

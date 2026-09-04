@@ -5,7 +5,7 @@
     :chart-options="chartOptions"
     :chart-plugins="plugins"
     :height="280"
-    aria-label="Net Income TTM je Firma als Balkendiagramm"
+    aria-label="Net Income TTM per company as a bar chart"
   />
 </template>
 
@@ -30,7 +30,6 @@ export default {
     }
   },
   computed: {
-    // TTM Net Income je Firma, absteigend sortiert
     rows() {
       return this.companies
         .map((company) => ({
@@ -46,16 +45,19 @@ export default {
           {
             data: this.rows.map((row) => row.value),
             backgroundColor: this.rows.map((row, index) => BLUE_SCALE[index]),
+            borderColor: '#ffffff',
+            borderWidth: 1,
+            borderSkipped: false,
           },
         ],
       }
     },
     chartOptions() {
       return {
-        indexAxis: 'y', // horizontale Balken
+        indexAxis: 'y',
         responsive: true,
         maintainAspectRatio: false,
-        layout: { padding: { right: 40 } }, // Platz fuer die Wert-Labels
+        layout: { padding: { right: 40 } }, // room for the value labels
         plugins: {
           legend: { display: false },
           datalabels: {
